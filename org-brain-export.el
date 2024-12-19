@@ -22,8 +22,13 @@
 
 ;;; General
 
-(defvar org-brain-export-directory (expand-file-name "export" org-brain-path)
-  "Directory where exported files will end up.")
+(defgroup org-brain-export ()
+  "How org-brain brains are exported to various formats."
+  :group 'org-brain)
+
+(defcustom org-brain-export-directory (expand-file-name "export" org-brain-path)
+  "Directory where exported files will end up."
+  :type 'directory)
 
 (defun org-brain-export--relation-data (from-entry to-entry)
   "Get relationship data FROM-ENTRY TO-ENTRY.
@@ -52,8 +57,9 @@ Represented as an alist."
 
 ;;; GraphViz
 
-(defvar org-brain-export-dot-file (expand-file-name "brain.dot" org-brain-export-directory)
-  "Where the output of `org-brain-export-dot' goes.")
+(defcustom org-brain-export-dot-file (expand-file-name "brain.dot" org-brain-export-directory)
+  "Where the output of `org-brain-export-dot' goes."
+  :type 'filename)
 
 (defun org-brain-export--dot-id (ob-data)
   "Convert id of OB-DATA into a dot readable format."
@@ -147,8 +153,13 @@ the current entry in `org-brain-visualize-mind-map' mode."
 
 ;;; HTML
 
-(defvar org-brain-export-html-file (expand-file-name "brain.html" org-brain-export-directory)
-  "Where the output of `org-brain-export-html' goes.")
+(defcustom org-brain-export-html-file (expand-file-name "brain.html" org-brain-export-directory)
+  "Where the output of `org-brain-export-html' goes."
+  :type 'filename)
+
+(defcustom org-brain-export-html-css-ref nil
+  "If set, a reference to this file or URL will be added to the exported HTML."
+  :type 'string)
 
 (defun org-brain-export--html-relation-list-item (relation)
   "Generate the HTML <li> to RELATION."
@@ -207,7 +218,12 @@ the current entry in `org-brain-visualize-mind-map' mode."
        (apply #'format
               (xmlgen
                `(html
-                 (head)
+                 ,(if org-brain-export-html-css-ref
+                      `(head
+                        (link :rel "stylesheet"
+                              :type "text/css"
+                              :href ,org-brain-export-html-css-ref))
+                    '(head))
                  (body
                   ,@(mapcar #'org-brain-export--generate-html data-rep))))
               (mapcar (lambda (x)
