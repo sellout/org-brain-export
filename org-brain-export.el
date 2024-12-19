@@ -205,14 +205,16 @@ the current entry in `org-brain-visualize-mind-map' mode."
     (with-temp-file org-brain-export-html-file
       (insert
        (apply #'format
-              (xmlgen
-               `(html
-                 (head)
-                 (body
-                  ,@(mapcar #'org-brain-export--generate-html data-rep))))
+              (string-replace
+               "%20" "%%20"
+               (xmlgen
+                `(html
+                  (head)
+                  (body
+                   ,@(mapcar #'org-brain-export--generate-html data-rep)))))
               (mapcar (lambda (x)
                         (or (ignore-errors (org-export-string-as (alist-get :text x) 'html t))
-                            "<i>Error during parsing of entry text...</i>"))
+                            "<p><i>Error during parsing of entry text...</i></p>"))
                       data-rep)))))
   (message "HTML export finished!"))
 
